@@ -1,0 +1,54 @@
+{
+  "name": "simp-simp_mcollective",
+  "version": "0.0.1",
+  "author": "SIMP Team",
+  "summary": "A SIMP Puppet Profile for common MCO configurations",
+  "license": "Apache-2.0",
+  "source": "https://github.com/simp/pupmod-simp-simp_mcollective",
+  "project_page": "https://github.com/simp/pupmod-simp-simp_mcollective",
+  "issues_url": "https://simp-project.atlassian.net",
+  "tags": [
+    "simp"
+  ],
+  "dependencies": [
+    {
+      "name": "voxpupuli/puppet-mcollective",
+      "version_requirement": ">= 2.5.0 < 7.0.0"
+    },
+    {
+      "name": "simp/simplib",
+      "version_requirement": ">= 3.2.0 < 4.0.0"
+    },
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 4.9.0 < 5.0.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": "4.x"
+    },
+    {
+      "name": "pe",
+      "version_requirement": ">= 2016.2.0"
+    }
+  ],
+  "data_provider": "hiera"
+}
