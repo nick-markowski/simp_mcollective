@@ -40,6 +40,8 @@
 class simp_mcollective (
   Boolean                          $mco_server              = true,
   Boolean                          $mco_client              = false,
+  Boolean                          $ssl_mco_autokeys        = true,
+  Stdlib::Absolutepath             $ssl_mco_autokeys_dir    = '/var/simp/environments/simp/site_files/mco_autokeys',
   Simplib::Netlist                 $trusted_nets            = simplib::lookup('simp_options::trusted_nets', { 'default_value' => ['127.0.0.1'] }),
   Stdlib::Absolutepath             $truststore_certificate  = '/etc/pki/cacerts/cacerts.pem',
   Stdlib::Absolutepath             $truststore_target       = '/etc/activemq/truststore.jks',
@@ -62,6 +64,7 @@ class simp_mcollective (
   Simplib::Netlist                 $activemq_brokers        = [$facts['fqdn']],
   Boolean                          $installplugins          = true
 ) {
+
   if $activemq_port {
     $_activemq_port = $activemq_port
   }
@@ -74,11 +77,37 @@ class simp_mcollective (
     }
   }
 
+  if $ssl_mco_autokeys {
+    file { $ssl_mco_autokeys_dir:
+      ensure => directory,
+      mode   => '0750',
+      owner  => 'root',
+      group  => 'puppet'
+    }
+    file { 'mco_priv_key':
+      path    => "$ssl_mco_autokeys_dir/mco_private.pem",
+      content => mco_autokey('2048', true),
+      mode    => '0400',
+      owner   => 'root',
+      group   => 'puppet',
+      require => File[$ssl_mco_autokeys_dir]
+    }
+    file { 'mco_pub_key':
+      path    => "$ssl_mco_autokeys_dir/mco_public.pem",
+      content => mco_autokey('2048'),
+      mode    => '0400',
+      owner   => 'root',
+      group   => 'puppet',
+      require => File['mco_priv_key'],
+    }
+  }
+
   if $activemq_ssl {
     class { '::mcollective':
       server              => $mco_server,
       client              => $mco_client,
       version             => 'latest',
+
       middleware_hosts    => $activemq_brokers,
       middleware_user     => $activemq_user,
       middleware_password => $activemq_password,
@@ -87,9 +116,9 @@ class simp_mcollective (
       middleware_ssl_ca   => $truststore_certificate,
       middleware_ssl_cert => $keystore_certificate,
       middleware_ssl_key  => $keystore_key,
-      ssl_mco_autokeys    => true,
       securityprovider    => 'ssl',
-      connector           => 'activemq'
+      connector           => 'activemq',
+      require             => File['mco_pub_key']
     }
   }
   else {
